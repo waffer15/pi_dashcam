@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, url_for
+from flask import Flask, render_template, Response, url_for, jsonify
 from threading import Thread
 import os
 import re
@@ -40,7 +40,7 @@ def save():
 def stream_generator():
    global camera
    while True:
-       camera.capture('frame.jpg')
+       camera.capture('frame.jpg', use_video_port=True)
        yield (b'--frame\r\n' 
               b'Content-Type: image/jpeg\r\n\r\n' + open('frame.jpg', 'rb').read() + b'\r\n')
  
