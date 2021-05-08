@@ -1,5 +1,15 @@
 [Unit]
 Description=Dashcam Startup
-After=user.target
+Wants=network-online.target
+After=network-online.target
 
 [Service]
+ExecStart=/usr/bin/python3 app.py
+WorkingDirectory=/home/pi/dashcam
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
