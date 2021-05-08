@@ -22,7 +22,7 @@ stream = picamera.PiCameraCircularIO(camera, seconds=RECORD_TIME)
 
 @app.route('/test') 
 def test(): 
-   return 'server running'
+   return render_template('test.html')
 
 
 @app.route('/dashcam')
@@ -34,12 +34,12 @@ def dashcam():
 def save():
     global save
     save = True
-    return 'saved video'
+    return render_template('saved.html')
 
 
 def stream_generator():
    global camera
-   while True: 
+   while True:
        camera.capture('frame.jpg')
        yield (b'--frame\r\n' 
               b'Content-Type: image/jpeg\r\n\r\n' + open('frame.jpg', 'rb').read() + b'\r\n')
@@ -55,7 +55,7 @@ def start_camera():
     global save
     global camera
     global stream
-
+    
     vids = glob.glob(video_dir + '*')
     video_num = 0
 
