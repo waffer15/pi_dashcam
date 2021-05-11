@@ -1,6 +1,20 @@
 <html>
-	<h1> Dashcam Stream </head>
-	<div>
-		<img src="{{ url_for('video_feed') }}">
-	</div>	
+<main>
+    <img src="{{ url_for('video_feed') }}">
+    <a href="{{ url_for('save') }}"> Save </a>
+    <style>
+        a { font-size: 100px; margin-right: 10px }
+        .delete { color: red }
+        .title { font-size: 105px; border-bottom: 4px solid black;}
+        main { padding: 2rem; }
+        img { width: 100%; margin-bottom: 2rem }
+    </style>
+    <div class="title"> Saved Videos </div>
+    {% for name in videos %}
+    <div>
+        <a href="{{ url_for('download', filename=name) }}"> {{ name }} </a>
+        <a class="delete" href="{{ url_for('delete', filename=name) }}">delete</a>
+    </div>
+    {% endfor %} 
+</main>
 </html>
