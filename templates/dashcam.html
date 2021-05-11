@@ -1,14 +1,17 @@
 <html>
+
+<style>
+    .delete { color: red }
+    .title { font-size: 90px; border-bottom: 4px solid black; color: #041b4a; margin-top: 0.5rem}
+    .save { color: #089c19; font-size: 75px}
+    a { font-size: 75px; margin-right: 4rem; text-decoration: underline; color: #165ff0; }
+    main { padding: 2rem;}
+    img { width: 100%; margin-bottom: 2rem }
+    body {background: #ededed; font-family: Bookman}
+</style>
 <main>
     <img src="{{ url_for('video_feed') }}">
-    <a href="{{ url_for('save') }}"> Save </a>
-    <style>
-        a { font-size: 100px; margin-right: 10px }
-        .delete { color: red }
-        .title { font-size: 105px; border-bottom: 4px solid black;}
-        main { padding: 2rem; }
-        img { width: 100%; margin-bottom: 2rem }
-    </style>
+    <a class="save"href="{{ url_for('save') }}"> Save Last 2 mins </a>
     <div class="title"> Saved Videos </div>
     {% for name in videos %}
     <div>

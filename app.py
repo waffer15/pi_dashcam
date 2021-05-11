@@ -11,15 +11,29 @@ app = Flask(__name__)
 
 video_dir = '/home/pi/dashcam/videos/'
 
-RESOLUTION = (1920, 1080)
+# constants
+RESOLUTION = (1280, 720)
 FRAMERATE = 25
-RECORD_TIME = 60 * 2
+RECORD_TIME = 120
 MAX_FILES = 9
 
+# global variables
 save = False
-stop = False
+vids = glob.glob(video_dir + '*')
+video_num = 0
 
+# calulate the number of the next video
+if len(vids) > 0:
+    newest = max(vids, key=os.path.getctime)
+    video_num = int(re.search(r'\d+', newest).group()) + 1
+
+# setting up the camera
 camera = picamera.PiCamera()
+camera.resolution = RESOLUTION
+camera.framerate = FRAMERATE
+   
+# circular stream that will save specified chunk of video in memory
+# 'seconds' is not perfect and will rarely save the exact time
 stream = picamera.PiCameraCircularIO(camera, seconds=RECORD_TIME)
 
 
@@ -35,8 +49,17 @@ def test():
 
 @app.route('/save')
 def save():
-    global save
-    save = True
+    global stream
+    global video_num
+
+    # create base video name and the filename for h264 format
+    video_base = f'{video_dir}video{video_num % MAX_FILES}'
+    file_name = video_base + '.h264'
+
+    # save the video as h264
+    stream.copy_to(file_name, seconds=RECORD_TIME)
+
+    video_num += 1
     return redirect(url_for('dashcam'))
 
 
@@ -79,33 +102,15 @@ def delete(filename):
 
 
 def start_camera():
-    global save
     global camera
     global stream
-    
-    vids = glob.glob(video_dir + '*')
-    video_num = 0
-
-    if len(vids) > 0:
-        newest = max(vids, key=os.path.getctime)
-        video_num = int(re.search(r'\d+', newest).group()) + 1
-    
+     
     camera.start_recording(stream, format='h264')
     camera.annotate_background = picamera.Color('black')
     try:
         while True:
             camera.annotate_text = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             camera.wait_recording(1)
-            if save == True:
-                # create base video name and the filename for h264 format
-                video_base = f'{video_dir}video{video_num % MAX_FILES}'
-                file_name = video_base + '.h264'
-
-                # save the video as h264
-                stream.copy_to(file_name)
-
-                video_num += 1
-                save = False
     finally:
         camera.stop_recording()
 
