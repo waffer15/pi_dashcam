@@ -47,8 +47,8 @@ def test():
    return render_template('test.html')
 
 
-@app.route('/save')
-def save():
+@app.route('/save/<int:time>')
+def save(time):
     global stream
     global video_num
 
@@ -57,7 +57,7 @@ def save():
     file_name = video_base + '.h264'
 
     # save the video as h264
-    stream.copy_to(file_name, seconds=RECORD_TIME)
+    stream.copy_to(file_name, seconds=time)
 
     video_num += 1
     return redirect(url_for('dashcam'))
@@ -65,7 +65,8 @@ def save():
 
 @app.route('/dashcam')
 def dashcam():
-    return render_template('dashcam.html', videos=os.listdir(video_dir))
+    sorted_dir = sorted(os.listdir(video_dir))
+    return render_template('dashcam.html', videos=sorted_dir)
 
 
 @app.route('/shutdown')
@@ -88,15 +89,16 @@ def video_feed():
                    mimetype='multipart/x-mixed-replace; boundary=frame') 
 
 
-@app.route('/download/<path:filename>')
-def download(filename):
-    new_filename = convert_to_mp4(filename[:(len(filename)-5)])
-    return send_from_directory(directory=video_dir, filename=new_filename)
+@app.route('/download/<path:file_name>')
+def download(file_name):
+    if 'mp4' not in file_name:
+        file_name = convert_to_mp4(file_name)
+    return send_from_directory(directory=video_dir, filename=file_name, as_attachment=True)
 
 
-@app.route('/delete/<path:filename>')
-def delete(filename):     
-    rm_cmd = f'rm {video_dir}{filename}'
+@app.route('/delete/<path:file_name>')
+def delete(file_name):     
+    rm_cmd = f'rm {video_dir}{file_name}'
     run([rm_cmd], shell=True)
     return redirect(url_for('dashcam'))
 
@@ -116,10 +118,10 @@ def start_camera():
 
 
 def convert_to_mp4(file_name):
-    new_filename = f'{file_name}.mp4'
-    convert_cmd = f'MP4Box -add {video_dir}{file_name}.h264 {video_dir}{new_filename}'
+    mp4_file = file_name.replace('h264', 'mp4')
+    convert_cmd = f'MP4Box -add {video_dir}{file_name} {video_dir}{mp4_file}'
     run([convert_cmd], shell=True)
-    return new_filename
+    return mp4_file 
 
 
 thread = Thread(target=start_camera)

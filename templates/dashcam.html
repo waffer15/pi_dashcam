@@ -3,7 +3,8 @@
 <style>
     .delete { color: red }
     .title { font-size: 90px; border-bottom: 4px solid black; color: #041b4a; margin-top: 0.5rem}
-    .save { color: #089c19; font-size: 75px}
+    .save { color: #089c19; font-size: 60px; }
+    .shutdown  { color: red; margin-top: 1rem; font-size: 75px; text-decoration: underline; }
     a { font-size: 75px; margin-right: 4rem; text-decoration: underline; color: #165ff0; }
     main { padding: 2rem;}
     img { width: 100%; margin-bottom: 2rem }
@@ -11,13 +12,16 @@
 </style>
 <main>
     <img src="{{ url_for('video_feed') }}">
-    <a class="save"href="{{ url_for('save') }}"> Save Last 2 mins </a>
+    <a class="save"href="{{ url_for('save', time=120) }}"> Save 2m </a>
+    <a class="save" href="{{ url_for('save', time=60) }}"> Save 1m </a>
+    <a class="save" href="{{ url_for('save', time=30) }}"> Save 30sec </a>
     <div class="title"> Saved Videos </div>
     {% for name in videos %}
     <div>
-        <a href="{{ url_for('download', filename=name) }}"> {{ name }} </a>
-        <a class="delete" href="{{ url_for('delete', filename=name) }}">delete</a>
+        <a href="{{ url_for('download', file_name=name) }}"> {{ name }} </a>
+        <a class="delete" href="{{ url_for('delete', file_name=name) }}">delete</a>
     </div>
-    {% endfor %} 
+    {% endfor %}
+    <a class="shutdown" href="{{ url_for('shutdown') }}"> Shutdown </a>
 </main>
 </html>
