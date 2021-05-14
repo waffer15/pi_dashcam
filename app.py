@@ -21,6 +21,7 @@ MAX_FILES = 9
 save = False
 vids = glob.glob(video_dir + '*')
 video_num = 0
+is_recording = False
 
 # calulate the number of the next video
 if len(vids) > 0:
@@ -47,6 +48,26 @@ def test():
    return render_template('test.html')
 
 
+@app.route('/record')
+def record():
+    global camera
+    global is_recording
+    time = dt.datetime.now().strftime('%H-%M-%S')
+    file_name = f'{video_dir}{time}.h264'
+    is_recording = True
+    camera.start_recording(file_name, splitter_port=2)
+    return redirect(url_for('dashcam'))
+
+
+@app.route('/stop_recording')
+def stop_recording():
+    global camera
+    global is_recording
+    camera.stop_recording(splitter_port=2)
+    is_recording = False
+    return redirect(url_for('dashcam'))
+
+
 @app.route('/save/<int:time>')
 def save(time):
     global stream
@@ -65,8 +86,9 @@ def save(time):
 
 @app.route('/dashcam')
 def dashcam():
+    global is_recording
     sorted_dir = sorted(os.listdir(video_dir))
-    return render_template('dashcam.html', videos=sorted_dir)
+    return render_template('dashcam.html', videos=sorted_dir, is_recording=is_recording)
 
 
 @app.route('/shutdown')
@@ -76,10 +98,14 @@ def shutdown():
 
 
 def stream_generator():
-   global camera
-   while True:
-       camera.capture('frame.jpg', use_video_port=True)
-       yield (b'--frame\r\n' 
+    global camera
+    while True:
+        try:
+            camera.capture('frame.jpg', use_video_port=True)
+        except:
+            print('error capturing')
+
+        yield (b'--frame\r\n' 
               b'Content-Type: image/jpeg\r\n\r\n' + open('frame.jpg', 'rb').read() + b'\r\n')
  
 

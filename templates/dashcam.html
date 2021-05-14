@@ -3,8 +3,9 @@
 <style>
     .delete { color: red }
     .title { font-size: 90px; border-bottom: 4px solid black; color: #041b4a; margin-top: 0.5rem}
-    .save { color: #089c19; font-size: 60px; }
+    .save { color: #089c19; font-size: 55px; }
     .shutdown  { color: red; margin-top: 1rem; font-size: 75px; text-decoration: underline; }
+    .rec {color: red; display: block; font-size: 55px; }
     a { font-size: 75px; margin-right: 4rem; text-decoration: underline; color: #165ff0; }
     main { padding: 2rem;}
     img { width: 100%; margin-bottom: 2rem }
@@ -15,6 +16,11 @@
     <a class="save"href="{{ url_for('save', time=120) }}"> Save 2m </a>
     <a class="save" href="{{ url_for('save', time=60) }}"> Save 1m </a>
     <a class="save" href="{{ url_for('save', time=30) }}"> Save 30sec </a>
+    {% if is_recording %} 
+        <a class="rec" href="{{ url_for('stop_recording') }}"> Stop Recording </a>
+    {% else %}
+        <a class="rec" href="{{ url_for('record') }}"> Record  </a>
+    {% endif %}
     <div class="title"> Saved Videos </div>
     {% for name in videos %}
     <div>
